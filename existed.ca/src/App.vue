@@ -15,7 +15,7 @@
     </v-toolbar>
 
     <v-content>
-      <PRSList></PRSList>
+      <PRSSearch></PRSSearch>
     </v-content>
   </v-app>
 </template>
@@ -23,11 +23,13 @@
 <script>
 //TODO: test for PRS List component, should delete it later
 import PRSList from './components/ui-common/PRSList'
+import PRSSearch from './components/ui-common/PRSSearch'
 
 export default {
   name: 'App',
   components: {
-    PRSList
+    PRSList,
+      PRSSearch
   },
   data () {
     return {
