@@ -1,29 +1,58 @@
 <template>
     <v-container>
+         <v-card>
         <v-layout row>
-            <v-flex xs12 sm6 offset-sm3>
-                Search
+            <v-flex xs12>
+                <v-flex xs12>
+                    <v-text-field
+                    label="Search"
+                    single-line
+                    box
+                    v-model="currentInput"
+                    v-on:change="searchCurrent"
+                    type="text"
+                    >
+                    </v-text-field>
+                </v-flex>
+             </v-flex>
+            
+        </v-layout>
 
-                <template v-for="(item, index) in synonyms">
-                    {{ item }}
-                </template>
-                <h1 v-if="domain">{{ domain }}</h1>
+        <v-layout row v-if="isAvailable != null">
+            <v-flex row offset-xs1 color="blue" v-if="isAvailable" >
+                This domain is available.
+            </v-flex>
+            <v-flex row offset-xs1 color="red" v-if="!isAvailable" >
+                This domain is not available.
             </v-flex>
         </v-layout>
 
         <v-layout row v-if="loading">
-            <v-flex xs12 sm6 offset-sm3>
+            <v-flex xs12>
                 Loading...
             </v-flex>
         </v-layout>
 
         <v-layout row v-if="error">
-            <v-flex xs12 sm6 offset-sm3>
+            <v-flex xs12>
                 Unable to retrieve this information at this time.
             </v-flex>
         </v-layout>
 
+        <v-layout row>
+            <v-flex xs12 offset-xs1>
+                <v-flex xs12>
+                    You could also try...
+                </v-flex>
+                <div  v-for="(item, i) in synonyms" :key="i">
+                    {{ item }}
+                </div>
+                <h1 v-if="domain">{{ domain }}</h1>
+            </v-flex>
+         </v-layout>
+
         <appPRSList></appPRSList>
+         </v-card>
     </v-container>
 </template>
 
@@ -38,14 +67,15 @@
             return {
                 loading: false,
                 error: false,
-                synonyms: [],
+                synonyms: ["hello", "hi"],
                 domain: null,
+                isAvailable: true,
+                currentInput: "",
             }
         },
 
         methods: {
-            fetchSynonyms(word)
-            {
+            fetchSynonyms(word) {
                 this.loading = true;
                 this.error = false;
 
@@ -61,7 +91,7 @@
                         this.loading = false;
                     })
             },
-            fetchDomainDetails(domainName){
+            fetchDomainDetails(domainName) {
                 this.loading = true;
                 this.error = false;
 
@@ -76,6 +106,15 @@
                     .finally(() => {
                         this.loading = false;
                     })
+            },
+            searchCurrent() {
+                this.fetchDomainDetails(this.current);
+                this.fetchSynonyms('this.current');
+            },
+            searchSynonyms() {
+                this.synonyms.forEach(element => {
+                    
+                });
             }
 
         },
@@ -85,8 +124,8 @@
         },
 
         created () {
-            this.fetchSynonyms('test');
-            this.fetchDomainDetails('google.com');
+            // this.fetchSynonyms('test');
+            // this.fetchDomainDetails('google.com');
         }
     }
 </script>
