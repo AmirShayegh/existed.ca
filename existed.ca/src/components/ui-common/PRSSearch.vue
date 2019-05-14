@@ -1,6 +1,24 @@
 <template>
     <v-container>
-        <v-layout row>
+            <v-layout row>
+                <v-flex xs12 sm6 offset-sm3>
+                    <v-text-field
+                            label="Your desired business name"
+                            solo
+                            clearable
+                            append-icon="search"
+                            @click:append="handleSubmit"
+                    ></v-text-field>
+                </v-flex>
+            </v-layout>
+        <v-layout row v-if="loadingSynonyms || loadedDomains < totalDomains">
+            <v-flex xs12 sm6 offset-sm3>
+                <template>
+                    <v-progress-linear :indeterminate="true"></v-progress-linear>
+                </template>
+            </v-flex>
+        </v-layout>
+        <v-layout row v-if="success">
             <v-flex xs12 sm6 offset-sm3>
                 Search
 
@@ -8,12 +26,6 @@
                     {{ item }}
                 </template>
                 <h1 v-if="domain">{{ domain }}</h1>
-            </v-flex>
-        </v-layout>
-
-        <v-layout row v-if="loading">
-            <v-flex xs12 sm6 offset-sm3>
-                Loading...
             </v-flex>
         </v-layout>
 
@@ -36,35 +48,52 @@
     export default {
         data () {
             return {
-                loading: false,
+                loadingSynonyms: false,
+                loadedDomains: 0,
+                totalDomains: 10,
                 error: false,
                 synonyms: [],
                 domain: null,
+                success: false
             }
         },
 
         methods: {
+            handleSubmit()
+            {
+                console.log('test');
+                this.error = false;
+                this.loadingSynonyms = true;
+                this.fetchSynonyms('test');
+                for (var i = 1; i <= 5; i++) {
+                    console.log(i);
+                    this.fetchDomainDetails('google.com');
+                }
+
+                if(!this.error)
+                {
+                    this.success = true;
+                }
+            },
             fetchSynonyms(word)
             {
-                this.loading = true;
-                this.error = false;
-
-                SynonymsApi.getSynonyms(word, 2)
+                SynonymsApi.getSynonyms(word, 5)
                     .then(data => {
                         this.synonyms = data;
+                        this.totalDomains = this.synonyms.length;
+                        this.loadedDomains++;
+
+                        console.log(this.totalDomains + ' ' + this.loadedDomains);
                     })
                     .catch(error => {
                         console.log(error)
                         this.error = true
                     })
                     .finally(() => {
-                        this.loading = false;
+                        this.loadingSynonyms = false;
                     })
             },
             fetchDomainDetails(domainName){
-                this.loading = true;
-                this.error = false;
-
                 DomainNamesApi.getDomainNameAvailability(domainName)
                     .then(data => {
                         this.domain = data;
@@ -74,7 +103,7 @@
                         this.error = true
                     })
                     .finally(() => {
-                        this.loading = false;
+
                     })
             }
 
@@ -85,12 +114,13 @@
         },
 
         created () {
-            this.fetchSynonyms('test');
-            this.fetchDomainDetails('google.com');
+
         }
     }
 </script>
 
 <style>
-
+    .icon-bg {
+        background-color: pink;
+    }
 </style>
