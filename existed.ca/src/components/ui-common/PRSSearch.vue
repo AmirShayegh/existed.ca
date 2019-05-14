@@ -27,7 +27,11 @@
             </v-flex>
         </v-layout>
 
-        <appPRSList v-if="success"></appPRSList>
+        <appPRSList
+                v-if="success"
+                :domain="domain"
+                :domainSynonyms="domainSynonyms"
+        />
     </v-container>
 </template>
 
@@ -57,7 +61,7 @@
                 this.success = false
                 this.loading = true
 
-                this.fetchDomainDetails(this.name, '.com')
+                await(this.fetchDomainDetails(this.name, '.com'))
 
                 await(this.fetchSynonyms(this.name, 10))
 

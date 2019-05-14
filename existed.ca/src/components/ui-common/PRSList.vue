@@ -3,36 +3,38 @@
     <v-flex xs12 sm6 offset-sm3>
       <v-card>
         <v-toolbar color="pink" dark>
-          <v-toolbar-side-icon></v-toolbar-side-icon>
 
-          <v-toolbar-title>Inbox</v-toolbar-title>
+          <v-toolbar-title> {{ domain.domain }}</v-toolbar-title>
 
           <v-spacer></v-spacer>
 
           <v-btn icon>
-            <v-icon>search</v-icon>
+            <v-icon v-if="domain.available">
+              check
+            </v-icon>
+            <v-icon v-else>
+              close
+            </v-icon>
           </v-btn>
 
         </v-toolbar>
 
         <v-list two-line>
-          <template v-for="(item, index) in items">
+          <template v-for="(item, index) in domainSynonyms">
             <v-list-tile
-              :key="item.title"
+              :key="item.domain"
               avatar
               ripple
               @click="toggle(index)"
             >
               <v-list-tile-content>
-                <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-                <v-list-tile-sub-title class="text--primary">{{ item.headline }}</v-list-tile-sub-title>
-                <v-list-tile-sub-title>{{ item.subtitle }}</v-list-tile-sub-title>
+                <v-list-tile-title>{{ item.domain }}</v-list-tile-title>
               </v-list-tile-content>
 
               <v-list-tile-action>
-                <v-list-tile-action-text>{{ item.action }}</v-list-tile-action-text>
+                <v-list-tile-action-text>{{ item.available }}</v-list-tile-action-text>
                 <v-icon
-                  v-if="selected.indexOf(index) < 0"
+                  v-if="!item.available"
                   color="grey lighten-1"
                 >
                   close
@@ -48,7 +50,7 @@
 
             </v-list-tile>
             <v-divider
-              v-if="index + 1 < items.length"
+              v-if="index + 1 < domainSynonyms.length"
               :key="index"
             ></v-divider>
           </template>
@@ -60,6 +62,9 @@
 
 <script>
 export default {
+    props: [
+        'domain', 'domainSynonyms'
+    ],
    data () {
       return {
         selected: [2],
