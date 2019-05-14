@@ -1,24 +1,14 @@
 import axios from 'axios';
 
 export default {
-    getDomainNameAvailability (domainName){
+    async getDomainNameAvailability (domainName){
         let endpoint = 'https://cors.io/?https://api.ote-godaddy.com/v1/domains/available?domain=' + domainName + '&checkType=FAST&forTransfer=false';
 
-        return axios.get(endpoint, this.getConfig())
+        return await axios.get(endpoint, this.getConfig())
             .then(response => {
                 return response.data;
             })
     },
-
-    getMultipleDomainNamesAvailability (domainNames){
-        let endpoint = 'https://cors.io/?https://api.ote-godaddy.com/v1/domains/available?checkType=FULL';
-
-        return axios.post(endpoint, this.getConfig())
-            .then(response => {
-                return response.data;
-            })
-    },
-
     getConfig()
     {
         return {

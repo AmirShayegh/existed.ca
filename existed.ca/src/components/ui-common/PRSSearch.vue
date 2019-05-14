@@ -1,31 +1,23 @@
 <template>
     <v-container>
-            <v-layout row>
-                <v-flex xs12 sm6 offset-sm3>
-                    <v-text-field
-                            label="Your desired business name"
-                            solo
-                            clearable
-                            append-icon="search"
-                            @click:append="handleSubmit"
-                    ></v-text-field>
-                </v-flex>
-            </v-layout>
-        <v-layout row v-if="loadingSynonyms || loadedDomains < totalDomains">
+        <v-layout row>
+            <v-flex xs12 sm6 offset-sm3>
+                <v-text-field
+                        v-model="name"
+                        label="Your desired business name"
+                        solo
+                        clearable
+                        append-icon="search"
+                        @click:append="handleSubmit"
+                ></v-text-field>
+            </v-flex>
+        </v-layout>
+
+        <v-layout row v-if="loading">
             <v-flex xs12 sm6 offset-sm3>
                 <template>
                     <v-progress-linear :indeterminate="true"></v-progress-linear>
                 </template>
-            </v-flex>
-        </v-layout>
-        <v-layout row v-if="success">
-            <v-flex xs12 sm6 offset-sm3>
-                Search
-
-                <template v-for="(item, index) in synonyms">
-                    {{ item }}
-                </template>
-                <h1 v-if="domain">{{ domain }}</h1>
             </v-flex>
         </v-layout>
 
@@ -35,7 +27,7 @@
             </v-flex>
         </v-layout>
 
-        <appPRSList></appPRSList>
+        <appPRSList v-if="success"></appPRSList>
     </v-container>
 </template>
 
@@ -48,55 +40,60 @@
     export default {
         data () {
             return {
-                loadingSynonyms: false,
-                loadedDomains: 0,
-                totalDomains: 10,
+                loading: false,
                 error: false,
+                success: false,
+                name: null,
                 synonyms: [],
                 domain: null,
-                success: false
+                domainSynonyms: []
             }
         },
 
         methods: {
-            handleSubmit()
+            async handleSubmit()
             {
-                console.log('test');
-                this.error = false;
-                this.loadingSynonyms = true;
-                this.fetchSynonyms('test');
-                for (var i = 1; i <= 5; i++) {
-                    console.log(i);
-                    this.fetchDomainDetails('google.com');
+                this.error = false
+                this.success = false
+                this.loading = true
+
+                this.fetchDomainDetails(this.name, '.com')
+
+                await(this.fetchSynonyms(this.name, 10))
+
+                for (const synonym of this.synonyms){
+                    await this.fetchDomainDetails(synonym.word, '.com')
                 }
 
-                if(!this.error)
-                {
+                this.loading = false;
+
+                if(!this.error){
                     this.success = true;
                 }
+
             },
-            fetchSynonyms(word)
+            async fetchSynonyms(word, max)
             {
-                SynonymsApi.getSynonyms(word, 5)
+                await SynonymsApi.getSynonyms(word, max)
                     .then(data => {
                         this.synonyms = data;
-                        this.totalDomains = this.synonyms.length;
-                        this.loadedDomains++;
-
-                        console.log(this.totalDomains + ' ' + this.loadedDomains);
                     })
                     .catch(error => {
                         console.log(error)
                         this.error = true
                     })
                     .finally(() => {
-                        this.loadingSynonyms = false;
+
                     })
             },
-            fetchDomainDetails(domainName){
-                DomainNamesApi.getDomainNameAvailability(domainName)
+            async fetchDomainDetails(domainName, topLevel){
+                await DomainNamesApi.getDomainNameAvailability(domainName + topLevel)
                     .then(data => {
-                        this.domain = data;
+                        if(this.domain == null){
+                            this.domain = data;
+                        } else {
+                            this.domainSynonyms.push(data);
+                        }
                     })
                     .catch(error => {
                         console.log(error)
